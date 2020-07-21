@@ -113,7 +113,7 @@ func CollectStraceMetrics(indicator *Indicator) {
 		straceBuffer    = &bytes.Buffer{}
 	)
 
-	if stracePids[indicator.Pid] {
+	if stracePids[indicator.Pid] == true {
 		return
 	} else {
 		stracePids[indicator.Pid] = true
