@@ -27,9 +27,10 @@ var (
 	gExporterConfig  = NewExporterConfig()
 	commonProcessLabelNames = []string{"command", "pid", "type"}
 	processGaugeVecMetrics = NewGaugeVecMetrics("process_workload_usage", "Cpu and mem usage of per process", commonProcessLabelNames)
+	collectors = make([]prometheus.Collector, 0)
 	processGaugeVec = GetMetricsCollect()
 	straceMetricsVec = GetStraceMetricsGaugeVec()
-	collectors = []prometheus.Collector{processGaugeVec, straceMetricsVec}
+	usageGaugeVec = getUsageCounterVec()
 )
 
 func init() {
@@ -51,17 +52,30 @@ func init() {
 }
 
 func GetMetricsCollect() *prometheus.GaugeVec {
-	return prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	vec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: processGaugeVecMetrics.Name,
 		Help: processGaugeVecMetrics.Help,
 	}, processGaugeVecMetrics.LabelsName)
+	collectors = append(collectors, vec)
+	return vec
 }
 
 func GetStraceMetricsGaugeVec() *prometheus.GaugeVec {
-	return prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	vec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "strace_metrics",
 		Help: "strace command return",
 	}, []string{"pid", "command", "call_name"})
+	collectors = append(collectors, vec)
+	return vec
+}
+
+func getUsageCounterVec() *prometheus.GaugeVec {
+	vec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "workload_usage_gauge",
+		Help: "memory and cpu usage gauge",
+	}, []string{"type", "subtype"})
+	collectors = append(collectors, vec)
+	return vec
 }
 
 func NewGaugeVecMetrics(metricsName string, MetricsHelp string, labelNames []string) *GaugeVecMetrics {

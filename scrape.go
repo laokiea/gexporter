@@ -16,6 +16,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -23,6 +24,9 @@ import (
 var (
 	ticker      *time.Ticker
 	stracePids  = make(map[int32]bool)
+	memUsageCount   float64
+	cpuUsageCount   float64
+	cpuUsageType = []string{"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest"}
 )
 
 // Normal indicator include cpu/mem usage
@@ -51,6 +55,13 @@ func CollectWorkLoadUsage() {
 				log.Error(err.Error())
 				continue
 			}
+
+			// counter
+			usageGaugeVec.With(prometheus.Labels{"type": "mem", "subtype": "mem"}).Set(memUsageCount)
+			memUsageCount = 0.0
+			// cpu usage
+			CalCpuUsage()
+
 			for _,indicator := range indicators {
 				exporter := gExporterConfig.Configs["exporter"].(string)
 				switch exporter {
@@ -91,7 +102,11 @@ func CollectNormalIndicators() (indicators []*Indicator, err error) {
 		if indicator.Command == excludeSelfProcess {
 			continue
 		}
+
 		go HighUsageCheck(&indicator)
+
+		// counter
+		memUsageCount += indicator.MemUsage
 		indicators = append(indicators, &indicator)
 	}
 
@@ -225,4 +240,46 @@ func fixCommandName(commandName *string) {
 		lastSlashPos := strings.LastIndex(name, string(os.PathSeparator))
 		*commandName = name[lastSlashPos+1:]
 	}
+}
+
+func CalCpuUsage() {
+	dataSample := make([]map[string]float64, 0)
+	wg := sync.WaitGroup{}
+
+	for i := 0;i < 2;i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			dataSample = append(dataSample, getCpuStatDetail(1))
+		}(i)
+		time.Sleep(time.Millisecond * 2000)
+	}
+	wg.Wait()
+
+	for _,f := range cpuUsageType {
+		usageGaugeVec.With(prometheus.Labels{"type": "cpu", "subtype": f}).Set((dataSample[0][f] - dataSample[1][f]) / (dataSample[0]["total"] - dataSample[1]["total"]))
+	}
+
+	usageGaugeVec.With(prometheus.Labels{"type": "cpu", "subtype": "total"}).Set(1 - ((dataSample[0]["idle"] - dataSample[1]["idle"]) / (dataSample[0]["total"] - dataSample[1]["total"])))
+}
+
+func getCpuStatDetail(line int) (detail map[string]float64) {
+	detail = make(map[string]float64)
+	cpuStatCmd := exec.Command("bash", "-c", fmt.Sprintf("cat /proc/stat | awk 'NR==%d {$1=null;print $0}'", line))
+	o,_ := cpuStatCmd.Output()
+	cpuStat := regexp.MustCompile(`\s+`).ReplaceAllString(string(o), " ")
+	cpuStatSlice := strings.Split(cpuStat, " ")
+
+	var (
+		i = 1
+		total float64
+	)
+	for _,f := range cpuUsageType {
+		detail[f],_ = strconv.ParseFloat(cpuStatSlice[i], 64)
+		total += detail[f]
+		i++
+	}
+	detail["total"] = total
+
+	return
 }
