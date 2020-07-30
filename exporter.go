@@ -25,7 +25,7 @@ type GaugeVecMetrics struct {
 var (
 	LogDir = "/data/logs/"
 	gExporterConfig  = NewExporterConfig()
-	commonProcessLabelNames = []string{"command", "pid", "type"}
+	commonProcessLabelNames = []string{"command", "type"}
 	processGaugeVecMetrics = NewGaugeVecMetrics("process_workload_usage", "Cpu and mem usage of per process", commonProcessLabelNames)
 	collectors = make([]prometheus.Collector, 0)
 	processGaugeVec = GetMetricsCollect()

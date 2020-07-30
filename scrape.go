@@ -65,13 +65,13 @@ func CollectWorkLoadUsage() {
 			// load average
 			CpuOb.LoadAverage()
 
-			for _,indicator := range indicators {
+			for _,indicator := range indicators[:10] {
 				exporter := gExporterConfig.Configs["exporter"].(string)
 				switch exporter {
 				case "pushgateway":
 					NormalUsagePushGateway(indicator)
 				case "expose":
-					//NormalUsageExpose(indicator)
+					NormalUsageExpose(indicator)
 				}
 			}
 		}
@@ -217,13 +217,13 @@ func HighUsageCheck(indicator *Indicator) {
 func NormalUsageExpose(indicator *Indicator) {
 	processGaugeVec.With(prometheus.Labels{
 		"command" : indicator.Command,
-		"pid" : strconv.FormatInt(int64(indicator.Pid), 10),
+		//"pid" : strconv.FormatInt(int64(indicator.Pid), 10),
 		"type" : "cpu",
 	}).Set(indicator.CpuUsage)
 
 	processGaugeVec.With(prometheus.Labels{
 		"command" : indicator.Command,
-		"pid" : strconv.FormatInt(int64(indicator.Pid), 10),
+		//"pid" : strconv.FormatInt(int64(indicator.Pid), 10),
 		"type" : "mem",
 	}).Set(indicator.MemUsage)
 }
