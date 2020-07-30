@@ -34,7 +34,7 @@ type GExporterConfig struct {
 }
 
 var (
-	configNames = []string{"exporter", "scrape_interval", "max_process_num"}
+	//configNames = []string{"exporter", "scrape_interval", "max_process_num"}
 )
 
 func NewExporterConfig() *GExporterConfig {
@@ -46,35 +46,28 @@ func NewExporterConfig() *GExporterConfig {
 	return gec
 }
 
-func (config *GExporterConfig) parseSingle(configName string) {
-	switch configName {
-	case "exporter":
-		exporter := flag.String("exporter", DefaultExporter, "exporter fashion")
-		if *exporter != "pushgateway" && *exporter != "expose" {
-			panic(errors.New("unsupport exporter"))
-		} else {
-			config.Configs["exporter"] = *exporter
-		}
-	case "scrape_interval":
-		scrapeInterval := flag.Int("scrape-interval", DefaultScrapeInterval, "scraping interval")
-		if *scrapeInterval > 60 || *scrapeInterval < 1 {
-			panic(errors.New("scrape interval over limit"))
-		} else {
-			config.Configs["scrape_interval"] = *scrapeInterval
-		}
-	case "max_process_num":
-		maxProcessNum := flag.Int("max-process-num", MaxCollectProcessNum, "max process num")
-		if *maxProcessNum > 200 {
-			panic(errors.New("max process num over limit"))
-		} else {
-			config.Configs["max_process_num"] = *maxProcessNum
-		}
-	}
-}
-
 func (config *GExporterConfig) parseConfig() {
-	for _,name := range configNames {
-		config.parseSingle(name)
+	exporter := flag.String("exporter", DefaultExporter, "exporter fashion")
+	maxProcessNum := flag.Int("max-process-num", MaxCollectProcessNum, "max process num")
+	scrapeInterval := flag.Int("scrape-interval", DefaultScrapeInterval, "scraping interval")
+	flag.Parse()
+
+	if *exporter != "pushgateway" && *exporter != "expose" {
+		panic(errors.New("unsupport exporter"))
+	} else {
+		config.Configs["exporter"] = *exporter
+	}
+
+	if *maxProcessNum > 2000 {
+		panic(errors.New("max process num over limit"))
+	} else {
+		config.Configs["max_process_num"] = *maxProcessNum
+	}
+
+	if *scrapeInterval > 60 || *scrapeInterval < 1 {
+		panic(errors.New("scrape interval over limit"))
+	} else {
+		config.Configs["scrape_interval"] = *scrapeInterval
 	}
 }
 
