@@ -115,6 +115,16 @@ func (cpu *CpuInfo) getCpuStatDetail(line int) (detail map[string]float64) {
 	return
 }
 
+// expose physical cpu num
+func (cpu *CpuInfo) ExposePCNum() {
+	pcnGaugeVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "physical cpu num",
+		Help: "physical cpu num",
+	}, []string{})
+	prometheus.MustRegister(pcnGaugeVec)
+	pcnGaugeVec.WithLabelValues().Set(cpu.PCpuNumfloat64())
+}
+
 // return new cpu obj
 func NewCpuOb() *CpuInfo {
 	CI := CpuInfo{}
@@ -127,6 +137,8 @@ func NewCpuOb() *CpuInfo {
 	CI.CpuCacheSize,_ = strconv.ParseUint(string(regexp.MustCompile(`cache size\s+:\s(\d+)`).FindSubmatch(cpuInfo)[1]), 10, 64)
 	CI.VirtualAddressSize,_ = strconv.ParseUint(string(regexp.MustCompile(`address sizes\s+:\s.+?(\d+)`).FindSubmatch(cpuInfo)[1]), 10, 64)
 	CI.SupportHT = CI.SiblingsNum == CI.CoresNum
+
+	CI.ExposePCNum()
 
 	return &CI
 }
