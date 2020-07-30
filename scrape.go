@@ -16,17 +16,17 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 )
 
 var (
-	ticker      *time.Ticker
-	stracePids  = make(map[int32]bool)
+	ticker          *time.Ticker
+	stracePids      = make(map[int32]bool)
 	memUsageCount   float64
-	cpuUsageCount   float64
-	cpuUsageType = []string{"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest"}
+	CpuOb           = NewCpuOb()
+	//cpuUsageCount   float64
+	//cpuUsageType = []string{"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest"}
 )
 
 // Normal indicator include cpu/mem usage
@@ -45,6 +45,7 @@ type StraceMetrics struct {
 	Syscall     string   `json:"syscall_name"`
 }
 
+// collect entry
 func CollectWorkLoadUsage() {
 	ticker = time.NewTicker(time.Second * time.Duration(gExporterConfig.getConfig("scrape_interval").(int)))
 	for {
@@ -60,7 +61,9 @@ func CollectWorkLoadUsage() {
 			usageGaugeVec.With(prometheus.Labels{"type": "mem", "subtype": "mem"}).Set(memUsageCount)
 			memUsageCount = 0.0
 			// cpu usage
-			CalCpuUsage()
+			CpuOb.CalCpuUsage()
+			// load average
+			CpuOb.LoadAverage()
 
 			for _,indicator := range indicators {
 				exporter := gExporterConfig.Configs["exporter"].(string)
@@ -75,6 +78,7 @@ func CollectWorkLoadUsage() {
 	}
 }
 
+// process normal indicators collect
 func CollectNormalIndicators() (indicators []*Indicator, err error) {
 	var (
 		maxProcessNum = gExporterConfig.Configs["max_process_num"].(int)
@@ -113,6 +117,7 @@ func CollectNormalIndicators() (indicators []*Indicator, err error) {
 	return
 }
 
+// strace process system call detail
 func CollectStraceMetrics(indicator *Indicator) {
 	if runtime.GOOS != TargetOs || os.Getuid() != 0 {
 		log.Fatal(errors.New("strace must run as root within linux os"))
@@ -196,6 +201,7 @@ func CollectStraceMetrics(indicator *Indicator) {
 	}
 }
 
+// high usage check
 func HighUsageCheck(indicator *Indicator) {
 	var (
 		cpuUsage = indicator.CpuUsage
@@ -222,10 +228,12 @@ func NormalUsageExpose(indicator *Indicator) {
 	}).Set(indicator.MemUsage)
 }
 
+// expose metrics to pushgateway
 func NormalUsagePushGateway(indicator *Indicator) {
 
 }
 
+// expose metrics
 func exposeHighUsageStraceMetrics(metric *StraceMetrics) {
 	straceMetricsVec.With(prometheus.Labels{
 		"pid" : strconv.FormatInt(int64(metric.I.Pid), 10),
@@ -234,52 +242,12 @@ func exposeHighUsageStraceMetrics(metric *StraceMetrics) {
 	}).Set(metric.Calls)
 }
 
+// fix command name
+//
 func fixCommandName(commandName *string) {
 	name := *commandName
 	if strings.Contains(name, string(os.PathSeparator)) {
 		lastSlashPos := strings.LastIndex(name, string(os.PathSeparator))
 		*commandName = name[lastSlashPos+1:]
 	}
-}
-
-func CalCpuUsage() {
-	dataSample := make([]map[string]float64, 0)
-	wg := sync.WaitGroup{}
-
-	for i := 0;i < 2;i++ {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			dataSample = append(dataSample, getCpuStatDetail(1))
-		}(i)
-		time.Sleep(time.Millisecond * 2000)
-	}
-	wg.Wait()
-
-	for _,f := range cpuUsageType {
-		usageGaugeVec.With(prometheus.Labels{"type": "cpu", "subtype": f}).Set((dataSample[0][f] - dataSample[1][f]) / (dataSample[0]["total"] - dataSample[1]["total"]))
-	}
-
-	usageGaugeVec.With(prometheus.Labels{"type": "cpu", "subtype": "total"}).Set(1 - ((dataSample[0]["idle"] - dataSample[1]["idle"]) / (dataSample[0]["total"] - dataSample[1]["total"])))
-}
-
-func getCpuStatDetail(line int) (detail map[string]float64) {
-	detail = make(map[string]float64)
-	cpuStatCmd := exec.Command("bash", "-c", fmt.Sprintf("cat /proc/stat | awk 'NR==%d {$1=null;print $0}'", line))
-	o,_ := cpuStatCmd.Output()
-	cpuStat := regexp.MustCompile(`\s+`).ReplaceAllString(string(o), " ")
-	cpuStatSlice := strings.Split(cpuStat, " ")
-
-	var (
-		i = 1
-		total float64
-	)
-	for _,f := range cpuUsageType {
-		detail[f],_ = strconv.ParseFloat(cpuStatSlice[i], 64)
-		total += detail[f]
-		i++
-	}
-	detail["total"] = total
-
-	return
 }

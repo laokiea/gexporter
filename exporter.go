@@ -31,6 +31,7 @@ var (
 	processGaugeVec = GetMetricsCollect()
 	straceMetricsVec = GetStraceMetricsGaugeVec()
 	usageGaugeVec = getUsageCounterVec()
+	loadAverageHistogramVec = NewLoadAverageHistogramVec()
 )
 
 func init() {
@@ -86,6 +87,16 @@ func NewGaugeVecMetrics(metricsName string, MetricsHelp string, labelNames []str
 		},
 		labelNames,
 	}
+}
+
+func NewLoadAverageHistogramVec() *prometheus.HistogramVec {
+	vec := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "load_average",
+		Help: "load average",
+		Buckets: CpuOb.GetLoadAverageBucket(),
+	}, []string{"range"})
+	collectors = append(collectors, vec)
+	return vec
 }
 
 // a http server for exposing metrics
