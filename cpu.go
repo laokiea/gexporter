@@ -118,7 +118,7 @@ func (cpu *CpuInfo) getCpuStatDetail(line int) (detail map[string]float64) {
 // expose physical cpu num
 func (cpu *CpuInfo) ExposePCNum() {
 	pcnGaugeVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "physical cpu num",
+		Name: "physical_cpu_num",
 		Help: "physical cpu num",
 	}, []string{})
 	prometheus.MustRegister(pcnGaugeVec)
