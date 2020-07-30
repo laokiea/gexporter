@@ -38,6 +38,7 @@ func (cpu *CpuInfo) GetLoadAverageBucket() (buckets []float64) {
 	buckets = append(buckets, cpu.PCpuNumfloat64() / 20.0)
 	buckets = append(buckets, cpu.PCpuNumfloat64() / 10.0)
 	buckets = append(buckets, cpu.PCpuNumfloat64() / 5.0)
+	buckets = append(buckets, cpu.PCpuNumfloat64() / 4.0)
 	buckets = append(buckets, cpu.PCpuNumfloat64() / 2.0)
 	buckets = append(buckets, cpu.PCpuNumfloat64())
 	buckets = append(buckets, cpu.PCpuNumfloat64() * loadAverageWorkConstant)
