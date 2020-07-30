@@ -102,7 +102,7 @@ func CollectNormalIndicators() (indicators []*Indicator, err error) {
 			log.Error(err.Error())
 			continue
 		}
-		fixCommandName(&indicator.Command)
+		//fixCommandName(&indicator.Command)
 		if indicator.Command == excludeSelfProcess {
 			continue
 		}
