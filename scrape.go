@@ -71,7 +71,7 @@ func CollectWorkLoadUsage() {
 				case "pushgateway":
 					NormalUsagePushGateway(indicator)
 				case "expose":
-					NormalUsageExpose(indicator)
+					//NormalUsageExpose(indicator)
 				}
 			}
 		}
