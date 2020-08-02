@@ -82,7 +82,7 @@ func CollectWorkLoadUsage() {
 func CollectNormalIndicators() (indicators []*Indicator, err error) {
 	var (
 		maxProcessNum = gExporterConfig.Configs["max_process_num"].(int)
-		metricsCmd = fmt.Sprintf(`ps aux | sort -r -n -k 3 | head -n %d | awk '{if(NR > 1) print "{\"cpu_usage\":" $3 ",\"mem_usage\":" $4 ",\"pid\":" $2 ",\"command\":\"" $11 "\"}"}'`, maxProcessNum + 1)
+		metricsCmd = fmt.Sprintf(`ps aux | sort -r -n -k 4 | head -n %d | awk '{if(NR > 0) print "{\"cpu_usage\":" $3 ",\"mem_usage\":" $4 ",\"pid\":" $2 ",\"command\":\"" $11 "\"}"}'`, maxProcessNum + 1)
 	)
 
 	cmd := exec.Command("bash", "-c", metricsCmd)
