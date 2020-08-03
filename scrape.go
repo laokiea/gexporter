@@ -82,27 +82,33 @@ func CollectWorkLoadUsage() {
 func CollectNormalIndicators() (indicators []*Indicator, err error) {
 	var (
 		maxProcessNum = gExporterConfig.Configs["max_process_num"].(int)
-		metricsCmd = fmt.Sprintf(`ps aux | sort -r -n -k 4 | head -n %d | awk '{if(NR > 0) print "{\"cpu_usage\":" $3 ",\"mem_usage\":" $4 ",\"pid\":" $2 ",\"command\":\"" $11 "\"}"}'`, maxProcessNum + 1)
+		cmdFormat = `ps aux | sort -r -n -k 4 | head -n %d | awk '{if(NR > 0) print "{\"cpu_usage\":" $3 ",\"mem_usage\":" $4 ",\"pid\":" $2 ",\"command\":\""} {if(NR > 0) for (i=11;i<=NF;i++)printf("%s ", $i);}  {if(NR > 0) print "\"}"}'`
+		metricsCmd = fmt.Sprintf(cmdFormat, maxProcessNum + 1, "%s")
 	)
 
 	cmd := exec.Command("bash", "-c", metricsCmd)
 	result, err := cmd.Output()
 	if err != nil {
+		log.Error(err.Error())
 		return
 	}
 
 	metricsString := strings.Trim(string(result), "\n")
+	// trim \n
+	metricsString = strings.ReplaceAll(metricsString, "\"command\":\"\n", "\"command\":\"")
 	metricsSlice := strings.Split(metricsString, "\n")
 	indicators = make([]*Indicator, 0, len(metricsSlice))
 	indicators = indicators[:0]
 
 	for _,metric := range metricsSlice {
 		var indicator = Indicator{}
+		metric = strings.ReplaceAll(metric, "\n", " ")
 		if err := json.Unmarshal([]byte(metric), &indicator);err != nil {
 			log.Error(err.Error())
 			continue
 		}
-		//fixCommandName(&indicator.Command)
+
+		fixCommandName(&indicator)
 		if indicator.Command == excludeSelfProcess {
 			continue
 		}
@@ -244,10 +250,11 @@ func exposeHighUsageStraceMetrics(metric *StraceMetrics) {
 
 // fix command name
 //
-func fixCommandName(commandName *string) {
-	name := *commandName
-	if strings.Contains(name, string(os.PathSeparator)) {
-		lastSlashPos := strings.LastIndex(name, string(os.PathSeparator))
-		*commandName = name[lastSlashPos+1:]
-	}
+func fixCommandName(indicator *Indicator) {
+	//name := indicator.Command
+	//if strings.Contains(name, string(os.PathSeparator)) {
+	//	lastSlashPos := strings.LastIndex(name, string(os.PathSeparator))
+	//	indicator.Command = name[lastSlashPos+1:]
+	//}
+	indicator.Command = fmt.Sprintf("%s,%d", indicator.Command, indicator.Pid)
 }
