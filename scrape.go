@@ -65,13 +65,13 @@ func CollectWorkLoadUsage() {
 			// load average
 			CpuOb.LoadAverage()
 
-			for _,indicator := range indicators[:10] {
+			for rank,indicator := range indicators[:10] {
 				exporter := gExporterConfig.Configs["exporter"].(string)
 				switch exporter {
 				case "pushgateway":
 					NormalUsagePushGateway(indicator)
 				case "expose":
-					NormalUsageExpose(indicator)
+					NormalUsageExpose(indicator, strconv.FormatInt(int64(rank), 10))
 				}
 			}
 		}
@@ -220,15 +220,17 @@ func HighUsageCheck(indicator *Indicator) {
 	}
 }
 
-func NormalUsageExpose(indicator *Indicator) {
+func NormalUsageExpose(indicator *Indicator, rank string) {
 	processGaugeVec.With(prometheus.Labels{
-		"command" : indicator.Command,
+		//"command" : indicator.Command,
+		"rank": rank,
 		//"pid" : strconv.FormatInt(int64(indicator.Pid), 10),
 		"type" : "cpu",
 	}).Set(indicator.CpuUsage)
 
 	processGaugeVec.With(prometheus.Labels{
-		"command" : indicator.Command,
+		//"command" : indicator.Command,
+		"rank": rank,
 		//"pid" : strconv.FormatInt(int64(indicator.Pid), 10),
 		"type" : "mem",
 	}).Set(indicator.MemUsage)
@@ -251,10 +253,10 @@ func exposeHighUsageStraceMetrics(metric *StraceMetrics) {
 // fix command name
 //
 func fixCommandName(indicator *Indicator) {
-	//name := indicator.Command
-	//if strings.Contains(name, string(os.PathSeparator)) {
-	//	lastSlashPos := strings.LastIndex(name, string(os.PathSeparator))
-	//	indicator.Command = name[lastSlashPos+1:]
-	//}
+	name := indicator.Command
+	if strings.Contains(name, string(os.PathSeparator)) {
+		lastSlashPos := strings.LastIndex(name, string(os.PathSeparator))
+		indicator.Command = name[lastSlashPos+1:]
+	}
 	indicator.Command = fmt.Sprintf("%s,%d", indicator.Command, indicator.Pid)
 }
