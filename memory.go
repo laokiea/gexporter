@@ -99,7 +99,7 @@ func (memory *MemoryInfo) GetMemoryIndicators() {
 		log.Fatal(errors.New(SmemCommandNotInstalledErr))
 	}
 
-	cmd := `smem -K -s pss -r | head -n %d | awk '{if(NR > 0) print "{\"uss_mem_usage\":" $5 ",\"pss_mem_usage\":" $6 ",\"command\":\"" $3 "\",\"pid\":" $1 "}"}'`
+	cmd := `smem -p -s pss -r | head -n %d | awk '{if(NR > 0) print "{\"uss_mem_usage\":" $5 ",\"pss_mem_usage\":" $6 ",\"command\":\"" $3 "\",\"pid\":" $1 "}"}'`
 	result,err := exec.Command("bash", "-c", fmt.Sprintf(cmd, gExporterConfig.Configs["max_process_num"].(int) + 1)).Output()
 	if err != nil {
 		log.Fatal(err.Error())
