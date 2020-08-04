@@ -16,6 +16,7 @@ var (
 	loadAverageWorkConstant float64 = 3.0
 )
 
+// cpu info struct
 type CpuInfo struct {
 	PhysicalCpuNum           uint8  // 物理处理器数量
 	ModelName   		     string // 处理器型号
