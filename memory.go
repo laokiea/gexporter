@@ -27,8 +27,8 @@ type Indicator struct {
 	UssMemUsage 	float64  `json:"uss_mem_usage"`
 	PssMemUsage 	float64  `json:"pss_mem_usage"`
 	RssMemUsage 	float64  `json:"rss_mem_usage"`
-	Pid         int32    `json:"pid"`
-	Command     string   `json:"command"`
+	Pid             int32    `json:"pid"`
+	Command         string   `json:"command"`
 }
 
 // memory info struct
@@ -59,8 +59,8 @@ func (memory *MemoryInfo) ExposeUssMemoryUsage() {
 	// total memory usage
 	memory.exposePssTotalMemUsage()
 	// top10 memory usage
+	exporter := gExporterConfig.Configs["exporter"].(string)
 	for rank,indicator := range memory.MemIndicators[:10] {
-		exporter := gExporterConfig.Configs["exporter"].(string)
 		switch exporter {
 		case "pushgateway":
 			//NormalUsagePushGateway(indicator)
@@ -68,6 +68,8 @@ func (memory *MemoryInfo) ExposeUssMemoryUsage() {
 			memory.exposeNormalUssUsage(indicator, strconv.FormatInt(int64(rank), 10))
 		}
 	}
+	// reset
+	memory.resetMemoryUsage()
 }
 
 // uss memory usage expose
@@ -85,6 +87,14 @@ func (memory *MemoryInfo) exposePssTotalMemUsage() {
 	usageGaugeVec.With(prometheus.Labels{"type": "mem", "subtype": "mem"}).Set(memory.PssMemUsage)
 }
 
+// reset memory info obj memory usage
+func (memory *MemoryInfo) resetMemoryUsage() {
+	memory.UssMemUsage = 0.0
+	memory.PssMemUsage = 0.0
+	memory.RssMemUsage = 0.0
+	memory.MemIndicators = memory.MemIndicators[:0]
+}
+
 // calculate pss memory usage
 func (memory *MemoryInfo) CalPssMemoryUsage() {
 	for _,ussIndicator := range memory.MemIndicators {
@@ -99,14 +109,15 @@ func (memory *MemoryInfo) GetMemoryIndicators() {
 		log.Fatal(errors.New(SmemCommandNotInstalledErr))
 	}
 
-	cmd := `smem -p -s pss -r | head -n %d | awk '{if(NR > 0) print "{\"uss_mem_usage\":" $5 ",\"pss_mem_usage\":" $6 ",\"command\":\"" $3 "\",\"pid\":" $1 "}"}'`
-	result,err := exec.Command("bash", "-c", fmt.Sprintf(cmd, gExporterConfig.Configs["max_process_num"].(int) + 1)).Output()
+	cmd := `smem -s pss -rHp -c "pid uss pss command" | head -n %d | awk '{if(NR > 0) print "{\"uss_mem_usage\":" $2 ",\"pss_mem_usage\":" $3 ",\"command\":\""} {for (i=4;i<=NF;i++)printf("%s ", $i);}  {print "\",\"pid\":" $1 "}"}'`
+	result,err := exec.Command("bash", "-c", fmt.Sprintf(cmd, gExporterConfig.Configs["max_process_num"].(int), "%s")).Output()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	metricsString := strings.Trim(string(result), "\n")
 	// trim \n
+	metricsString = strings.ReplaceAll(metricsString, "%", "")
 	metricsString = strings.ReplaceAll(metricsString, "\"command\":\"\n", "\"command\":\"")
 	metricsSlice := strings.Split(metricsString, "\n")
 
@@ -235,7 +246,7 @@ func (memory *MemoryInfo) exposeHighUsageStraceMetrics(metric *StraceMetrics) {
 // check smem command installed
 func (memory *MemoryInfo) checkSmemCommandInstalled() bool {
 	wi,_ := exec.Command(`whereis smem`).Output()
-	if string(wi) == "" {
+	if string(wi) == " " {
 		return false
 	}
 	return true
