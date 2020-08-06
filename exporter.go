@@ -99,6 +99,15 @@ func NewLoadAverageHistogramVec() *prometheus.HistogramVec {
 	return vec
 }
 
+func GetGaugeVec(name string, help string, labels []string) *prometheus.GaugeVec {
+	gaugeVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: name,
+		Help: help,
+	}, labels)
+	prometheus.MustRegister(gaugeVec)
+	return gaugeVec
+}
+
 // a http server for exposing metrics
 func PromHttpServerStart() {
 	mux := http.NewServeMux()

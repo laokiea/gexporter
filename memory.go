@@ -55,6 +55,7 @@ func NewMemoryOb() *MemoryInfo {
 }
 
 func (memory *MemoryInfo) ExposeUssMemoryUsage() {
+	defer timeUseCondition()
 	memory.GetMemoryIndicators()
 	// total memory usage
 	memory.exposePssTotalMemUsage()
@@ -70,6 +71,17 @@ func (memory *MemoryInfo) ExposeUssMemoryUsage() {
 	}
 	// reset
 	memory.resetMemoryUsage()
+}
+
+// fix command name
+//
+func (memory *MemoryInfo) fixCommandName(indicator *Indicator) {
+	name := indicator.Command
+	if strings.Contains(name, string(os.PathSeparator)) {
+		lastSlashPos := strings.LastIndex(name, string(os.PathSeparator))
+		indicator.Command = name[lastSlashPos+1:]
+	}
+	indicator.Command = fmt.Sprintf("%s,%d", indicator.Command, indicator.Pid)
 }
 
 // uss memory usage expose
@@ -130,7 +142,7 @@ func (memory *MemoryInfo) GetMemoryIndicators() {
 			continue
 		}
 
-		fixCommandName(&rssIndicator)
+		memory.fixCommandName(&rssIndicator)
 		if rssIndicator.Command == excludeSelfProcess {
 			continue
 		}
@@ -280,7 +292,7 @@ func (memory *MemoryInfo) GetRssMemoryUsage() {
 			continue
 		}
 
-		fixCommandName(&indicator)
+		memory.fixCommandName(&indicator)
 		if indicator.Command == excludeSelfProcess {
 			continue
 		}

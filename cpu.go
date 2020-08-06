@@ -54,6 +54,7 @@ func (cpu *CpuInfo) PCpuNumfloat64() float64 {
 
 // observe load average
 func (cpu *CpuInfo) LoadAverage() {
+	defer timeUseCondition()
 	load := cpu.getLoadAverage()
 	for r,v := range load {
 		loadAverageHistogramVec.WithLabelValues(r).Observe(v)
@@ -74,6 +75,7 @@ func (cpu *CpuInfo) getLoadAverage() (loadAverage map[string]float64) {
 
 // calculate cpu usage within 100% percent
 func (cpu *CpuInfo) CalCpuUsage() {
+	defer timeUseCondition()
 	dataSample := make([]map[string]float64, 0)
 	wg := sync.WaitGroup{}
 
