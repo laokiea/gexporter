@@ -9,12 +9,13 @@ import (
 )
 
 var (
-	ticker          *time.Ticker
-	stracePids      = make(map[int32]bool)
-	CpuOb           = NewCpuOb()
-	MemoryOb        = NewMemoryOb()
-	gTimeChan       = make(chan int64, 0)
-	gDown           int32 = 0
+	ticker               *time.Ticker
+	stracePids           = make(map[int32]bool)
+	CpuOb                = NewCpuOb()
+	MemoryOb             = NewMemoryOb()
+	gTimeChan            = make(chan float64, 0)
+	gCountDown int32     = 0
+	gMtx                 = sync.Mutex{}
 )
 
 // collect entry
@@ -24,7 +25,7 @@ func CollectWorkLoadUsage() {
 	for {
 		select {
 		case <- ticker.C:
-			timeUseStart := time.Now().UnixNano() / 1e6
+			timeUseStart := float64(time.Now().UnixNano()) / 1e6
 			// cpu usage
 			go CpuOb.CalCpuUsage()
 			// load average
@@ -34,19 +35,18 @@ func CollectWorkLoadUsage() {
 			// time use
 			timeUseStop := <- gTimeChan
 			timeUse := timeUseStop - timeUseStart
-			timeUseGaugeVec.WithLabelValues().Set(float64(timeUse))
+			timeUseGaugeVec.WithLabelValues().Set(timeUse)
 		}
 	}
 }
 
 func timeUseCondition() {
-	mtx := sync.Mutex{}
-	atomic.AddInt32(&gDown, 1)
-	mtx.Lock()
-	if gDown == 3 {
-		gTimeChan <- time.Now().UnixNano() / 1e6
+	atomic.AddInt32(&gCountDown, 1)
+	gMtx.Lock()
+	if gCountDown == 3 {
+		gTimeChan <- float64(time.Now().UnixNano()) / 1e6
 	}
-	mtx.Unlock()
+	gMtx.Unlock()
 }
 
 // expose metrics to pushgateway
