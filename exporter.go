@@ -5,17 +5,22 @@
 package exporter
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
+	"runtime"
 )
 
 type Metrics struct {
 	Name string
 	Help string
 }
+
+type GExporterLogFormatter struct {}
 
 type GaugeVecMetrics struct {
 	*Metrics
@@ -35,10 +40,12 @@ var (
 )
 
 func init() {
+	// init log
+	log.SetFormatter(new(GExporterLogFormatter))
 	// set logger output file
 	file, err := os.OpenFile(LogDir+"exporter.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{"skip":5}).Fatal(err)
 		return
 	}
 	log.SetOutput(file)
@@ -50,6 +57,30 @@ func init() {
 	if gExporterConfig.Configs["exporter"].(string) == "expose" {
 		go PromHttpServerStart()
 	}
+}
+
+func (f *GExporterLogFormatter) Format(entry *log.Entry) ([]byte, error) {
+	skip, e := entry.Data["skip"]
+	if e {
+		_, file, line, ok := runtime.Caller(skip.(int))
+		if !ok {
+			file = "???"
+			line = 0
+		}
+
+		delete(entry.Data, "skip")
+		entry.Data["file"] = file
+		entry.Data["line"] = line
+	}
+
+	entry.Data["level"] = entry.Level
+	entry.Data["message"] = entry.Message
+
+	serialized, err := json.Marshal(entry.Data)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to marshal fields to JSON, %v", err)
+	}
+	return append(serialized, '\n'), nil
 }
 
 func GetMetricsCollect() *prometheus.GaugeVec {
@@ -118,6 +149,6 @@ func PromHttpServerStart() {
 		Addr: "0.0.0.0:" + MetricsHttpPort,
 	}
 	if err := httpServer.ListenAndServe(); err != nil {
-		log.Error(err.Error())
+		log.WithFields(log.Fields{"skip":5}).Error(err.Error())
 	}
 }

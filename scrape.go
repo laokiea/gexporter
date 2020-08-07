@@ -45,6 +45,7 @@ func timeUseCondition() {
 	gMtx.Lock()
 	if gCountDown == 3 {
 		gTimeChan <- float64(time.Now().UnixNano()) / 1e6
+		gCountDown = 0
 	}
 	gMtx.Unlock()
 }
