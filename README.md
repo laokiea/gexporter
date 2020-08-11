@@ -1,5 +1,9 @@
 # gexporter
 
+## Require
+* os: linux
+* user: root
+
 ## 指标
 *  cpu使用率, 包括user,system,total
 *  内存使用率，包括pss,rss,uss
