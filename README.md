@@ -5,6 +5,7 @@
 *  内存使用率，包括pss,rss,uss
 *  cpu负载
 *  cpu信息，包括物理核数，逻辑核数等
+*  strace信息
 
 ## config
 *  抓取间隔 -scrape-interval=15
