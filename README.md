@@ -27,3 +27,4 @@ curl -X GET http://127.0.0.1:80/metrics
 http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?orgId=2
 
 ## prometheus json file
+http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?editview=dashboard_json&orgId=2
