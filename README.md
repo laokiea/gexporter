@@ -3,6 +3,7 @@
 ## Require
 * os: linux
 * user: root
+* 系统命令: smem strace
 
 ## 指标
 *  cpu使用率, 包括user,system,total
