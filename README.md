@@ -21,7 +21,7 @@
 ## Usage：
 cd run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &
 
-## prometheus dashboard json example 
+## Prometheus dashboard json example 
 http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?editview=dashboard_json&orgId=2
 
 ## 效果
