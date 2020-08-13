@@ -50,6 +50,7 @@ func (config *GExporterConfig) parseConfig() {
 	exporter := flag.String("exporter", DefaultExporter, "exporter fashion")
 	maxProcessNum := flag.Int("max-process-num", MaxCollectProcessNum, "max process num")
 	scrapeInterval := flag.Int("scrape-interval", DefaultScrapeInterval, "scraping interval")
+	promHttpPort := flag.Int("prom-http-port", 80, "prom http server port")
 	flag.Parse()
 
 	if *exporter != "pushgateway" && *exporter != "expose" {
@@ -68,6 +69,12 @@ func (config *GExporterConfig) parseConfig() {
 		panic(errors.New("scrape interval over limit"))
 	} else {
 		config.Configs["scrape_interval"] = *scrapeInterval
+	}
+
+	if *promHttpPort > 1<<0x10 {
+		panic(errors.New("port too large"))
+	} else {
+		config.Configs["prom_http_port"] = *promHttpPort
 	}
 }
 

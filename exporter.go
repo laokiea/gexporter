@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 )
 
 type Metrics struct {
@@ -146,7 +147,7 @@ func PromHttpServerStart() {
 
 	httpServer := &http.Server{
 		Handler: mux,
-		Addr: "0.0.0.0:" + MetricsHttpPort,
+		Addr: "0.0.0.0:" + strconv.FormatInt(gExporterConfig.Configs["prom_http_port"].(int64), 64),
 	}
 	if err := httpServer.ListenAndServe(); err != nil {
 		log.WithFields(log.Fields{"skip":5}).Error(err.Error())
