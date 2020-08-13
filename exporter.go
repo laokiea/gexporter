@@ -147,7 +147,7 @@ func PromHttpServerStart() {
 
 	httpServer := &http.Server{
 		Handler: mux,
-		Addr: "0.0.0.0:" + strconv.FormatInt(int64(gExporterConfig.Configs["prom_http_port"].(int)), 64),
+		Addr: "0.0.0.0:" + strconv.FormatInt(int64(gExporterConfig.Configs["prom_http_port"].(int)), 10),
 	}
 	if err := httpServer.ListenAndServe(); err != nil {
 		log.WithFields(log.Fields{"skip":5}).Error(err.Error())
