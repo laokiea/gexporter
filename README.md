@@ -16,6 +16,7 @@
 *  抓取间隔 -scrape-interval=15
 *  监控最大进程数 -max-process-num=1000
 *  数据暴露处理，支持直接expose和pushgateway，-exporter=expose|pushgateway
+*  服务端口，-prom-http-port=80
 
 ## Usage：
 cd run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &
