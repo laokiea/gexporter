@@ -26,5 +26,5 @@ curl -X GET http://127.0.0.1:80/metrics
 ## 效果
 http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?orgId=2
 
-## prometheus dashboard json file
+## prometheus dashboard json
 http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?editview=dashboard_json&orgId=2
