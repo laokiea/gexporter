@@ -20,10 +20,11 @@
 
 ## Usage：
 1. Run 
-cd run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &
+`cd run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &`
 2. 接入监控
-https://bluecity.feishu.cn/docs/doccnb2wPsfGJQbjimU9oCkh49c
+`https://bluecity.feishu.cn/docs/doccnb2wPsfGJQbjimU9oCkh49c`
 示例
+```
 curl -X POST -H "Content-Type: application/json" --data-raw { \
     "team": "team-im", \
     "app": "base-project", \ 
@@ -34,6 +35,8 @@ curl -X POST -H "Content-Type: application/json" --data-raw { \
         "10.9.86.167" \
     ] \
 } http://webhook.svc.bks-dev.ourbluecity.com/monitor 
+```
+
 
 ## Prometheus dashboard json example 
 http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?editview=dashboard_json&orgId=2
