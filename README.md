@@ -19,7 +19,7 @@
 *  服务端口，-prom-http-port=80
 
 ## Usage：
-1. Run 
+1. Run
 `cd run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &`
 2. 接入监控
 `https://bluecity.feishu.cn/docs/doccnb2wPsfGJQbjimU9oCkh49c`
