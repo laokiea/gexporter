@@ -42,4 +42,4 @@ curl -X POST -H "Content-Type: application/json" --data-raw { \
 http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?editview=dashboard_json&orgId=2
 
 ## 效果
-http://grafana.svc.bks.ourbluecity.com/d/66UORb4Gk/load?orgId=2
+http://grafana.svc.bks.ourbluecity.com/d/66UORb4Gk/load?orgId=2&var-instance=All
