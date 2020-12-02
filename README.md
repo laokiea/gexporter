@@ -3,7 +3,7 @@
 ## Require
 * os: linux
 * user: root
-* 系统命令: apt-get install smem
+* smem,strace
 
 ## 指标
 *  cpu使用率, 包括user,system,total
