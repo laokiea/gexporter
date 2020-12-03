@@ -25,6 +25,7 @@ RUN set -ex; \
     && apk update \
     && apk upgrade \
     && apk add util-linux \
+    && apk add python2 \
     && wget https://www.selenic.com/smem/download/smem-${SMEM_VERSION}.tar.gz \
     && tar -zvxf smem-${SMEM_VERSION}.tar.gz \
     && cp ./smem-${SMEM_VERSION}/smem /usr/bin
