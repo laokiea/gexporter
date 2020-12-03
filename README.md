@@ -22,7 +22,7 @@
 1. Run
 `git clone git@git.blued.cn:sashengpeng/gexporter.git && cd gexporter/run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &`
 或者
-docker-compose up -d
+`docker-compose up -d`
 
 2. 接入监控
 `https://bluecity.feishu.cn/docs/doccnb2wPsfGJQbjimU9oCkh49c`
