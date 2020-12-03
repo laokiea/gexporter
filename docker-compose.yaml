@@ -1,0 +1,10 @@
+version: "3.3"
+
+services:
+  gexporter:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+      container_name: gexporter
+      ports:
+        - "80"
