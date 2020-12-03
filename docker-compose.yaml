@@ -5,6 +5,6 @@ services:
     build:
       dockerfile: ./Dockerfile
       context: ./
-      container_name: gexporter
-      ports:
+    ports:
         - "80"
+    container_name: gexporter
