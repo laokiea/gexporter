@@ -8,3 +8,4 @@ services:
     ports:
         - "80"
     container_name: gexporter
+    image: "gexporter"
