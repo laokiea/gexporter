@@ -9,3 +9,6 @@ services:
         - "8765:80"
     container_name: gexporter
     image: "gexporter"
+    restart: "always"
+    volumes:
+      - "/data/logs/:/data/logs"
