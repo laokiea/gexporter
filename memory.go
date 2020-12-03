@@ -122,7 +122,7 @@ func (memory *MemoryInfo) GetMemoryIndicators() {
 	}
 
 	cmd := `smem -s pss -rHp -c "pid uss pss command" | head -n %d | awk '{if(NR > 0) print "{\"uss_mem_usage\":" $2 ",\"pss_mem_usage\":" $3 ",\"command\":\""} {for (i=4;i<=NF;i++)printf("%s ", $i);}  {print "\",\"pid\":" $1 "}"}'`
-	result,err := exec.Command("bash", "-c", fmt.Sprintf(cmd, gExporterConfig.Configs["max_process_num"].(int), "%s")).Output()
+	result,err := exec.Command("sh", "-c", fmt.Sprintf(cmd, gExporterConfig.Configs["max_process_num"].(int), "%s")).Output()
 	if err != nil {
 		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())
 	}
@@ -187,7 +187,7 @@ func (memory *MemoryInfo) CollectStraceMetrics(indicator *Indicator) {
 	defer straceFile.Close()
 
 	highUsageCCmd := fmt.Sprintf("strace -u work -f -p %d -c -e trace=all -o %s", indicator.Pid, straceFileName)
-	execCmd := exec.Command("bash", "-c", highUsageCCmd)
+	execCmd := exec.Command("sh", "-c", highUsageCCmd)
 	execCmd.Stdout = straceBuffer
 
 
@@ -273,7 +273,7 @@ func (memory *MemoryInfo) GetRssMemoryUsage() {
 		metricsCmd = fmt.Sprintf(cmdFormat, maxProcessNum + 1, "%s")
 	)
 
-	cmd := exec.Command("bash", "-c", metricsCmd)
+	cmd := exec.Command("sh", "-c", metricsCmd)
 	result, err := cmd.Output()
 	if err != nil {
 		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())

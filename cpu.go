@@ -64,7 +64,7 @@ func (cpu *CpuInfo) LoadAverage() {
 // get load average
 func (cpu *CpuInfo) getLoadAverage() (loadAverage map[string]float64) {
 	loadAverage = make(map[string]float64)
-	statistic,_ := exec.Command("bash", "-c", `uptime | grep -o -E 'load average:(.*)' | awk '{print $3 $4 $5}'`).Output()
+	statistic,_ := exec.Command("sh", "-c", `uptime | grep -o -E 'load average:(.*)' | awk '{print $3 $4 $5}'`).Output()
 	result := strings.Split(strings.Trim(string(statistic), "\n"), ",")
 	for k,r := range []string{"1", "5", "15"} {
 		loadAverage[r],_ = strconv.ParseFloat(result[k], 64)
@@ -99,7 +99,7 @@ func (cpu *CpuInfo) CalCpuUsage() {
 // get cpu usage detail
 func (cpu *CpuInfo) getCpuStatDetail(line int) (detail map[string]float64) {
 	detail = make(map[string]float64)
-	cpuStatCmd := exec.Command("bash", "-c", fmt.Sprintf("cat /proc/stat | awk 'NR==%d {$1=null;print $0}'", line))
+	cpuStatCmd := exec.Command("sh", "-c", fmt.Sprintf("cat /proc/stat | awk 'NR==%d {$1=null;print $0}'", line))
 	o,_ := cpuStatCmd.Output()
 	cpuStat := regexp.MustCompile(`\s+`).ReplaceAllString(string(o), " ")
 	cpuStatSlice := strings.Split(cpuStat, " ")
@@ -131,7 +131,7 @@ func (cpu *CpuInfo) ExposePCNum() {
 // return new cpu obj
 func NewCpuOb() *CpuInfo {
 	CI := CpuInfo{}
-	cpuInfo,_ := exec.Command("bash", "-c", "cat /proc/cpuinfo").Output()
+	cpuInfo,_ := exec.Command("sh", "-c", "cat /proc/cpuinfo").Output()
 
 	CI.PhysicalCpuNum = uint8(strings.Count(string(cpuInfo), "physical id"))
 	CI.SiblingsNum = uint8(strings.Count(string(cpuInfo), "siblings"))
