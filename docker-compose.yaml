@@ -6,6 +6,6 @@ services:
       dockerfile: ./Dockerfile
       context: ./
     ports:
-        - "80"
+        - "8765:80"
     container_name: gexporter
     image: "gexporter"
