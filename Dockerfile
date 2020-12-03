@@ -25,7 +25,7 @@ RUN set -ex; \
     && apk add util-linux \
     && wget https://www.selenic.com/smem/download/smem-${SMEM_VERSION}.tar.gz \
     && tar -zvxf smem-${SMEM_VERSION}.tar.gz \
-    && cp ./smem-${SMEM_VERSION}/smem /user/bin
+    && cp ./smem-${SMEM_VERSION}/smem /usr/bin
 
 COPY --from=builder /gexporter/gexpoter_main ./
 
