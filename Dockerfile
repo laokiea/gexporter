@@ -14,6 +14,19 @@ RUN set -x; \
 
 FROM uhub.service.ucloud.cn/bluecity/alpine:3.12
 
+WORKDIR /app
+
+ENV SMEM_VERSION=1.4
+
+RUN set -ex; \
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk update \
+    && apk upgrade \
+    && apk add util-linux \
+    && wget https://www.selenic.com/smem/download/smem-${SMEM_VERSION}.tar.gz \
+    && tar -zvxf smem-${SMEM_VERSION}.tar.gz \
+    && cp ./smem-${SMEM_VERSION}/smem /user/bin
+
 COPY --from=builder /gexporter/gexpoter_main ./
 
 EXPOSE 80
