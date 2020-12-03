@@ -3,7 +3,7 @@
 ## Require
 * os: linux
 * user: root
-* 系统命令: apt-get install smem
+* smem,strace
 
 ## 指标
 *  cpu使用率, 包括user,system,total
@@ -20,7 +20,9 @@
 
 ## Usage：
 1. Run
-`cd run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &`
+`git clone git@git.blued.cn:sashengpeng/gexporter.git && cd gexporter/run && go build -o gexporter_main && ./gexporter_main -max-process-num=1000 &`
+或者
+`go get laokiea/gexporter`
 2. 接入监控
 `https://bluecity.feishu.cn/docs/doccnb2wPsfGJQbjimU9oCkh49c`
 示例
@@ -42,4 +44,4 @@ curl -X POST -H "Content-Type: application/json" --data-raw { \
 http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?editview=dashboard_json&orgId=2
 
 ## 效果
-http://grafana.svc.bks-dev.ourbluecity.com/d/_-79c_4Mk/im-backend-test?orgId=2
+http://grafana.svc.bks.ourbluecity.com/d/66UORb4Gk/load?orgId=2&var-instance=All
