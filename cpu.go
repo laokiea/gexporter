@@ -136,9 +136,9 @@ func NewCpuOb() *CpuInfo {
 	CI.PhysicalCpuNum = uint8(strings.Count(string(cpuInfo), "physical id"))
 	CI.SiblingsNum = uint8(strings.Count(string(cpuInfo), "siblings"))
 	CI.CoresNum = uint8(strings.Count(string(cpuInfo), "core id"))
-	CI.ModelName = string(regexp.MustCompile(`model name\s+:\s(\w+)`).FindSubmatch(cpuInfo)[1])
-	CI.CpuCacheSize,_ = strconv.ParseUint(string(regexp.MustCompile(`cache size\s+:\s(\d+)`).FindSubmatch(cpuInfo)[1]), 10, 64)
-	CI.VirtualAddressSize,_ = strconv.ParseUint(string(regexp.MustCompile(`address sizes\s+:\s.+?(\d+)`).FindSubmatch(cpuInfo)[1]), 10, 64)
+	CI.ModelName = string(regexp.MustCompile(`model name\s+:\s+(\w+)`).FindSubmatch(cpuInfo)[1])
+	CI.CpuCacheSize,_ = strconv.ParseUint(string(regexp.MustCompile(`cache size\s+:\s+(\d+)`).FindSubmatch(cpuInfo)[1]), 10, 64)
+	CI.VirtualAddressSize,_ = strconv.ParseUint(string(regexp.MustCompile(`address sizes\s+:\s+.+?(\d+)`).FindSubmatch(cpuInfo)[1]), 10, 64)
 	CI.SupportHT = CI.SiblingsNum == CI.CoresNum
 
 	CI.ExposePCNum()
