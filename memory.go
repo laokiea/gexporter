@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 	logtax "log"
 	"os"
 	"os/exec"
@@ -208,7 +208,7 @@ func (memory *MemoryInfo) CollectStraceMetrics(indicator *Indicator) {
 		select {
 		case <-straceTimer.C:
 			if err := syscall.Kill(pid, syscall.SIGINT); err != nil {
-				log.WithFields(log.Fields{"skip":7}).Error(err.Error() + ",send SIGINT error")
+				// log.WithFields(log.Fields{"skip":7}).Error(err.Error() + ",send SIGINT error")
 				logtax.Println(err.Error() + ",send SIGINT error")
 			}
 			return
@@ -296,7 +296,7 @@ func (memory *MemoryInfo) GetRssMemoryUsage() {
 		var indicator = Indicator{}
 		metric = strings.ReplaceAll(metric, "\n", " ")
 		if err := json.Unmarshal([]byte(metric), &indicator);err != nil {
-			log.WithFields(log.Fields{"skip":7}).Error(err.Error())
+			// log.WithFields(log.Fields{"skip":7}).Error(err.Error())
 			logtax.Println(err.Error())
 			continue
 		}
