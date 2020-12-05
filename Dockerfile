@@ -28,7 +28,7 @@ RUN set -ex; \
     && apk add python2 \
     && wget https://www.selenic.com/smem/download/smem-${SMEM_VERSION}.tar.gz \
     && tar -zvxf smem-${SMEM_VERSION}.tar.gz \
-    && chmod +x ./smem-${SMEM_VERSION}/smem
+    && chmod +x ./smem-${SMEM_VERSION}/smem \
     && cp ./smem-${SMEM_VERSION}/smem /usr/bin
 
 COPY --from=builder /gexporter/gexpoter_main ./
