@@ -144,7 +144,7 @@ func (memory *MemoryInfo) GetMemoryIndicators() {
 			//log.WithFields(log.Fields{"skip":7}).Error(err.Error())
 			logtax.Println(err.Error())
 			logtax.SetPrefix("[Info]")
-			logtax.Println(metric)
+			logtax.Println(string(result))
 			continue
 		}
 
