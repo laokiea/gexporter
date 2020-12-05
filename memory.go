@@ -119,14 +119,14 @@ func (memory *MemoryInfo) CalPssMemoryUsage() {
 // get uss memory usage indicators
 func (memory *MemoryInfo) GetMemoryIndicators() {
 	if !memory.checkSmemCommandInstalled() {
-		log.WithFields(log.Fields{"skip":7}).Fatal(errors.New(SmemCommandNotInstalledErr))
+		//log.WithFields(log.Fields{"skip":7}).Fatal(errors.New(SmemCommandNotInstalledErr))
 		logtax.Fatal(errors.New(SmemCommandNotInstalledErr))
 	}
 
 	cmd := `smem -s pss -rHp -c "pid uss pss command" | head -n %d | awk '{if(NR > 0) print "{\"uss_mem_usage\":" $2 ",\"pss_mem_usage\":" $3 ",\"command\":\""} {for (i=4;i<=NF;i++)printf("%s ", $i);}  {print "\",\"pid\":" $1 "}"}'`
 	result,err := exec.Command("sh", "-c", fmt.Sprintf(cmd, gExporterConfig.Configs["max_process_num"].(int), "%s")).Output()
 	if err != nil {
-		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())
+		//log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())
 		logtax.Fatal(err.Error())
 	}
 
@@ -141,7 +141,7 @@ func (memory *MemoryInfo) GetMemoryIndicators() {
 		var rssIndicator = Indicator{}
 		metric = strings.ReplaceAll(metric, "\n", " ")
 		if err := json.Unmarshal([]byte(metric), &rssIndicator);err != nil {
-			log.WithFields(log.Fields{"skip":7}).Error(err.Error())
+			//log.WithFields(log.Fields{"skip":7}).Error(err.Error())
 			logtax.Println(err.Error())
 			continue
 		}
@@ -169,7 +169,7 @@ func (memory *MemoryInfo) HighUsageCheck(indicator *Indicator) {
 // strace process system call detail
 func (memory *MemoryInfo) CollectStraceMetrics(indicator *Indicator) {
 	if runtime.GOOS != TargetOs || os.Getuid() != 0 {
-		log.WithFields(log.Fields{"skip":7}).Fatal(errors.New("strace must run as root within linux os"))
+		//log.WithFields(log.Fields{"skip":7}).Fatal(errors.New("strace must run as root within linux os"))
 		logtax.Fatal(errors.New("strace must run as root within linux os"))
 		return
 	}
@@ -197,7 +197,7 @@ func (memory *MemoryInfo) CollectStraceMetrics(indicator *Indicator) {
 
 
 	if err := execCmd.Start();err != nil {
-		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error()+",Command start failed")
+		//log.WithFields(log.Fields{"skip":7}).Fatal(err.Error()+",Command start failed")
 		logtax.Fatal(err.Error()+",Command start failed")
 	}
 
@@ -283,7 +283,7 @@ func (memory *MemoryInfo) GetRssMemoryUsage() {
 	cmd := exec.Command("sh", "-c", metricsCmd)
 	result, err := cmd.Output()
 	if err != nil {
-		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())
+		//log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())
 		logtax.Fatal(err.Error())
 	}
 
