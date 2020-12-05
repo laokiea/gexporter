@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	logtax "log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -119,12 +120,14 @@ func (memory *MemoryInfo) CalPssMemoryUsage() {
 func (memory *MemoryInfo) GetMemoryIndicators() {
 	if !memory.checkSmemCommandInstalled() {
 		log.WithFields(log.Fields{"skip":7}).Fatal(errors.New(SmemCommandNotInstalledErr))
+		logtax.Fatal(errors.New(SmemCommandNotInstalledErr))
 	}
 
 	cmd := `smem -s pss -rHp -c "pid uss pss command" | head -n %d | awk '{if(NR > 0) print "{\"uss_mem_usage\":" $2 ",\"pss_mem_usage\":" $3 ",\"command\":\""} {for (i=4;i<=NF;i++)printf("%s ", $i);}  {print "\",\"pid\":" $1 "}"}'`
 	result,err := exec.Command("sh", "-c", fmt.Sprintf(cmd, gExporterConfig.Configs["max_process_num"].(int), "%s")).Output()
 	if err != nil {
 		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())
+		logtax.Fatal(err.Error())
 	}
 
 	metricsString := strings.Trim(string(result), "\n")
@@ -139,6 +142,7 @@ func (memory *MemoryInfo) GetMemoryIndicators() {
 		metric = strings.ReplaceAll(metric, "\n", " ")
 		if err := json.Unmarshal([]byte(metric), &rssIndicator);err != nil {
 			log.WithFields(log.Fields{"skip":7}).Error(err.Error())
+			logtax.Println(err.Error())
 			continue
 		}
 
@@ -166,6 +170,7 @@ func (memory *MemoryInfo) HighUsageCheck(indicator *Indicator) {
 func (memory *MemoryInfo) CollectStraceMetrics(indicator *Indicator) {
 	if runtime.GOOS != TargetOs || os.Getuid() != 0 {
 		log.WithFields(log.Fields{"skip":7}).Fatal(errors.New("strace must run as root within linux os"))
+		logtax.Fatal(errors.New("strace must run as root within linux os"))
 		return
 	}
 
@@ -193,6 +198,7 @@ func (memory *MemoryInfo) CollectStraceMetrics(indicator *Indicator) {
 
 	if err := execCmd.Start();err != nil {
 		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error()+",Command start failed")
+		logtax.Fatal(err.Error()+",Command start failed")
 	}
 
 	go func(pid int) {
@@ -203,6 +209,7 @@ func (memory *MemoryInfo) CollectStraceMetrics(indicator *Indicator) {
 		case <-straceTimer.C:
 			if err := syscall.Kill(pid, syscall.SIGINT); err != nil {
 				log.WithFields(log.Fields{"skip":7}).Error(err.Error() + ",send SIGINT error")
+				logtax.Println(err.Error() + ",send SIGINT error")
 			}
 			return
 		}
@@ -277,6 +284,7 @@ func (memory *MemoryInfo) GetRssMemoryUsage() {
 	result, err := cmd.Output()
 	if err != nil {
 		log.WithFields(log.Fields{"skip":7}).Fatal(err.Error())
+		logtax.Fatal(err.Error())
 	}
 
 	metricsString := strings.Trim(string(result), "\n")
@@ -289,6 +297,7 @@ func (memory *MemoryInfo) GetRssMemoryUsage() {
 		metric = strings.ReplaceAll(metric, "\n", " ")
 		if err := json.Unmarshal([]byte(metric), &indicator);err != nil {
 			log.WithFields(log.Fields{"skip":7}).Error(err.Error())
+			logtax.Println(err.Error())
 			continue
 		}
 

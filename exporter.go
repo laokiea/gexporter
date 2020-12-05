@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
+	logtax "log"
 	"net/http"
 	"os"
 	"runtime"
@@ -51,6 +52,8 @@ func init() {
 		return
 	}
 	log.SetOutput(file)
+	logtax.SetOutput(file)
+	logtax.SetFlags(logtax.Ldate | logtax.Lshortfile | logtax.Ltime)
 
 	// must register collector before expose/push
 	prometheus.MustRegister(collectors...)
@@ -152,5 +155,6 @@ func PromHttpServerStart() {
 	}
 	if err := httpServer.ListenAndServe(); err != nil {
 		log.WithFields(log.Fields{"skip":5}).Error(err.Error())
+		logtax.Println(err.Error())
 	}
 }
