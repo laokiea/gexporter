@@ -43,15 +43,16 @@ var (
 
 func init() {
 	// init log
-	log.SetFormatter(new(GExporterLogFormatter))
+	// log.SetFormatter(new(GExporterLogFormatter))
 	// set logger output file
 	_ = os.MkdirAll(LogDir, 0777)
 	file, err := os.OpenFile(LogDir+"exporter.log", os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0666)
 	if err != nil {
-		log.WithFields(log.Fields{"skip":5}).Fatal(err)
+		// log.WithFields(log.Fields{"skip":5}).Fatal(err)
+		logtax.Println(err)
 		return
 	}
-	log.SetOutput(file)
+	// log.SetOutput(file)
 	logtax.SetOutput(file)
 	logtax.SetFlags(logtax.Ldate | logtax.Lshortfile | logtax.Ltime)
 
@@ -154,7 +155,7 @@ func PromHttpServerStart() {
 		Addr: "0.0.0.0:" + strconv.FormatInt(int64(gExporterConfig.Configs["prom_http_port"].(int)), 10),
 	}
 	if err := httpServer.ListenAndServe(); err != nil {
-		log.WithFields(log.Fields{"skip":5}).Error(err.Error())
+		// log.WithFields(log.Fields{"skip":5}).Error(err.Error())
 		logtax.Println(err.Error())
 	}
 }
