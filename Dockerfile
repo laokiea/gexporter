@@ -12,6 +12,7 @@ RUN set -x; \
     && go env -w GOPATH=/gopath \
     && go env -w GO111MODULE=on \
     && go env -w GOPROXY=https://goproxy.cn,direct \
+    && go get -u github.com/google/gops \
     && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s" -o gexpoter_main run/run.go
 
 FROM uhub.service.ucloud.cn/bluecity/alpine:3.12
@@ -32,6 +33,8 @@ RUN set -ex; \
     && cp ./smem-${SMEM_VERSION}/smem /usr/bin
 
 COPY --from=builder /gexporter/gexpoter_main ./
+
+COPY --from=builder /gopath/bin/gops /usr/bin/
 
 EXPOSE 80
 
