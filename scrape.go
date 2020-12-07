@@ -3,6 +3,7 @@
 package exporter
 
 import (
+	logtax "log"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -20,6 +21,13 @@ var (
 
 // collect entry
 func CollectWorkLoadUsage() {
+	// log panic
+	defer func() {
+		if v := recover(); v != nil {
+			logtax.Fatal(v)
+		}
+	}()
+
 	timeUseGaugeVec := GetGaugeVec("scrape_time_use", "scrape time use", []string{})
 	ticker = time.NewTicker(time.Second * time.Duration(gExporterConfig.getConfig("scrape_interval").(int)))
 	for {
